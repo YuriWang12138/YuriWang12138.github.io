@@ -200,6 +200,23 @@ async function deal(fromPack) {
   }
   await sleep(fromPack ? 520 : 300);
 }
+async function riseFromPack() {
+  ring.mode = 'deal'; ring.pos = ring.target = 0; var H = stage.clientHeight, w = cw();
+  cards.forEach(function (c, i) { c.classList.remove('t'); c.style.filter = ''; c.style.opacity = 0; c.style.zIndex = 20 - i; c.style.transform = 'translate3d(0,' + (H * .17).toFixed(0) + 'px,0) scale(.54)'; });
+  await sleep(40);
+  for (var i = N - 1; i >= 0; i--) {
+    var c = cards[i], o = i - (N - 1) / 2;
+    c.classList.add('t'); c.style.opacity = 1;
+    c.style.transform = 'translate3d(' + (o * w * .085).toFixed(0) + 'px,' + (-H * .2 + Math.abs(o) * w * .02).toFixed(0) + 'px,0) scale(.74) rotate(' + (o * 2.6).toFixed(1) + 'deg)';
+    await sleep(85);
+  }
+  await sleep(460);
+}
+async function showcase() {
+  var H = stage.clientHeight, s = Math.min(1.22, H * .78 / cards[0].offsetHeight);
+  cards.forEach(function (c, i) { c.classList.add('t'); c.style.transform = 'translate3d(0,' + (-H * .03).toFixed(0) + 'px,0) scale(' + (i ? s * .9 : s).toFixed(3) + ')'; });
+  await sleep(950);
+}
 async function toRing() {
   stage.classList.add('opened', 'ring'); stage.classList.remove('opening'); $('#team').classList.add('opened'); ring.mode = 'ring'; setCardTabs(true);
   cards.forEach(function (c) { c.classList.add('t'); }); applyRing();
@@ -216,7 +233,7 @@ var pack = { ok: false, state: 'idle', rot: 0, vel: 0, auto: true, lastTouch: 0,
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.outputEncoding = THREE.sRGBEncoding; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.1;
   var scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(28, 1, .1, 60); camera.position.z = 12.4;
-  var W = 2.5, H = 4.2, T = .3, S0 = .075, S1 = .925, yTear = (S1 - .5) * H;
+  var W = 2.5, H = 4.2, T = .44, S0 = .075, S1 = .925, yTear = (S1 - .5) * H;
 
   // soft-box environment so the foil has something to reflect
   var ec = document.createElement('canvas'); ec.width = 512; ec.height = 256; var ex = ec.getContext('2d');
@@ -228,13 +245,13 @@ var pack = { ok: false, state: 'idle', rot: 0, vel: 0, auto: true, lastTouch: 0,
 
   function foil(back) {
     var c = document.createElement('canvas'); c.width = 1024; c.height = 1720; var x = c.getContext('2d'), w = 1024, h = 1720;
-    var g = x.createLinearGradient(0, 0, w * .35, h); g.addColorStop(0, '#262250'); g.addColorStop(.36, '#5a4c95'); g.addColorStop(.62, '#b56a8c'); g.addColorStop(.84, '#e7935f'); g.addColorStop(1, '#f5c08a');
+    var g = x.createLinearGradient(0, 0, w * .35, h); g.addColorStop(0, '#1b1848'); g.addColorStop(.34, '#4f3f9c'); g.addColorStop(.6, '#b4518a'); g.addColorStop(.82, '#ea8a4e'); g.addColorStop(1, '#f8cc8f');
     x.fillStyle = g; x.fillRect(0, 0, w, h);
     for (var i = 0; i < 7; i++) { var sx = -200 + i * 210; var sg = x.createLinearGradient(sx, 0, sx + 160, 0); sg.addColorStop(0, 'rgba(255,255,255,0)'); sg.addColorStop(.5, 'rgba(255,255,255,' + (.05 + (i % 3) * .035) + ')'); sg.addColorStop(1, 'rgba(255,255,255,0)'); x.save(); x.transform(1, 0, -.25, 1, 0, 0); x.fillStyle = sg; x.fillRect(sx, 0, 160, h); x.restore(); }
     var sh = h * S0;
     [[0, sh], [h - sh, h]].forEach(function (b) { x.fillStyle = 'rgba(20,14,40,.22)'; x.fillRect(0, b[0], w, sh); for (var y = b[0] + 6; y < b[1]; y += 13) { x.fillStyle = 'rgba(255,255,255,.28)'; x.fillRect(0, y, w, 3); x.fillStyle = 'rgba(10,6,30,.3)'; x.fillRect(0, y + 4, w, 3); } });
     x.globalCompositeOperation = 'destination-out'; x.beginPath();
-    for (var tx = 0; tx < w; tx += 24) { x.moveTo(tx, 0); x.lineTo(tx + 12, 15); x.lineTo(tx + 24, 0); x.moveTo(tx, h); x.lineTo(tx + 12, h - 15); x.lineTo(tx + 24, h); }
+    for (var tx = 0; tx < w; tx += 32) { x.moveTo(tx, 0); x.lineTo(tx + 16, 20); x.lineTo(tx + 32, 0); x.moveTo(tx, h); x.lineTo(tx + 16, h - 20); x.lineTo(tx + 32, h); }
     x.fill(); x.globalCompositeOperation = 'source-over';
     x.textAlign = 'center'; x.fillStyle = '#fff';
     var sp = function (v) { if ('letterSpacing' in x) x.letterSpacing = v; };
@@ -249,12 +266,28 @@ var pack = { ok: false, state: 'idle', rot: 0, vel: 0, auto: true, lastTouch: 0,
       x.font = '600 34px "VD Latin",serif'; sp('12px'); x.fillText('MEMBER PACK', w / 2 + 6, 1229);
       x.font = '500 34px "VD Serif",serif'; sp('10px'); x.fillText('AI 视觉设计社团 · 成员卡 ×6', w / 2 + 5, 1470); x.globalAlpha = 1;
     } else {
-      x.globalAlpha = .92; x.font = '500 46px "VD Latin",serif'; sp('14px'); x.fillText('VISION DIMENSION', w / 2 + 7, 520);
-      x.font = '400 120px "VD Brush","KaiTi",serif'; sp('10px'); x.fillText('社团成员卡包', w / 2 + 5, 700);
-      x.font = '500 38px "VD Serif",serif'; sp('8px');
-      ['指导教师 ×2', '社长 ×1', '核心成员 ×3'].forEach(function (s, i) { x.fillText(s, w / 2 + 4, 900 + i * 76); });
-      x.font = '500 30px "VD Serif",serif'; sp('8px'); x.fillText('创意设计 · 数字影像 · 内容传播 · 项目实践', w / 2 + 4, 1250);
-      for (var b = 0; b < 46; b++) { x.fillRect(w / 2 - 190 + b * 8.3, 1380, (b * 7 % 5) + 1.5, 80); } x.globalAlpha = 1;
+      // back of the pack: emblem, contents panel, foil stamp, barcode
+      x.save(); x.translate(w / 2, 330); x.rotate(-.33); x.lineWidth = 5; x.strokeStyle = 'rgba(255,240,220,.9)'; x.beginPath(); x.ellipse(0, 0, 150, 52, 0, 0, TAU); x.stroke(); x.rotate(.33);
+      x.transform(1, -.2, 0, 1, 0, 0); x.fillStyle = 'rgba(255,235,210,.75)'; x.fillRect(-42, -96, 84, 192); x.restore();
+      x.fillStyle = '#fff'; x.globalAlpha = .95;
+      x.font = '600 44px "VD Latin",serif'; sp('16px'); x.fillText('MEMBER PACK', w / 2 + 8, 520);
+      x.font = '400 104px "VD Brush","KaiTi",serif'; sp('12px'); x.fillText('社团成员卡包', w / 2 + 6, 650);
+      x.globalAlpha = .16; x.fillRect(170, 730, w - 340, 360); x.globalAlpha = .9; x.lineWidth = 2.5; x.strokeStyle = '#fff'; x.strokeRect(170, 730, w - 340, 360);
+      x.font = '600 26px "VD Latin",serif'; sp('10px'); x.fillText('CONTENTS', w / 2 + 5, 790);
+      [['指导教师', 'MENTOR', '×2'], ['社长', 'PRESIDENT', '×1'], ['核心成员', 'CORE MEMBER', '×3']].forEach(function (r, i) {
+        var y = 870 + i * 78;
+        x.textAlign = 'left'; x.font = '600 40px "VD Serif",serif'; sp('6px'); x.fillText(r[0], 220, y); var wcn = Math.max(x.measureText(r[0]).width, r[0].length * 46);
+        x.font = '500 22px "VD Latin",serif'; sp('5px'); x.globalAlpha = .7; x.fillText(r[1], 220 + wcn + 22, y - 3);
+        x.globalAlpha = .9; x.textAlign = 'right'; x.font = '600 44px "VD Latin",serif'; sp('2px'); x.fillText(r[2], w - 220, y - 8);
+        x.globalAlpha = .35; x.fillRect(220, y + 22, w - 440, 1.5); x.globalAlpha = .9;
+      });
+      x.textAlign = 'center'; x.font = '500 28px "VD Serif",serif'; sp('8px');
+      x.fillText('创意设计 · 数字影像', w / 2 + 4, 1180); x.fillText('内容传播 · 项目实践', w / 2 + 4, 1232);
+      x.save(); x.translate(250, 1420); x.lineWidth = 3; x.beginPath(); x.arc(0, 0, 74, 0, TAU); x.stroke(); x.lineWidth = 1.5; x.beginPath(); x.arc(0, 0, 62, 0, TAU); x.stroke();
+      x.font = '600 44px "VD Latin",serif'; sp('2px'); x.fillText('VD', 1, 6); x.font = '500 18px "VD Latin",serif'; sp('5px'); x.fillText('2026', 3, 36); x.restore();
+      for (var b = 0; b < 44; b++) { x.fillRect(400 + b * 9.6, 1362, (b * 7 % 5) + 1.5, 86); }
+      x.font = '500 22px "VD Latin",serif'; sp('7px'); x.fillText('VD · MEMBER PACK · 6 CARDS', 615, 1486);
+      x.font = '500 24px "VD Serif",serif'; sp('8px'); x.globalAlpha = .8; x.fillText('鞍山师范学院 · AI 视觉设计社团', w / 2 + 4, 1560); x.globalAlpha = 1;
     }
     var t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = 8; return t;
   }
@@ -264,14 +297,64 @@ var pack = { ok: false, state: 'idle', rot: 0, vel: 0, auto: true, lastTouch: 0,
     for (var i = 0; i < p.count; i++) { var u = p.getX(i) / (W / 2), v = v0 + (p.getY(i) / (H * (v1 - v0)) + .5) * (v1 - v0); p.setY(i, (v - .5) * H); p.setZ(i, bulge(u, v)); uv.setXY(i, (u + 1) / 2, v); }
     g.computeVertexNormals(); return g;
   }
+  // foil creases + crimped seals as a normal map, derived from a painted height field
+  function wrinkles() {
+    var n = 512, c = document.createElement('canvas'); c.width = c.height = n; var x = c.getContext('2d', { willReadFrequently: true });
+    x.fillStyle = '#808080'; x.fillRect(0, 0, n, n); x.lineCap = 'round';
+    var rnd = (function (a) { return function () { a = (a * 16807) % 2147483647; return a / 2147483647; }; })(20261);
+    for (var i = 0; i < 44; i++) {
+      var top = rnd() < .5, y0 = top ? n * (S0 + rnd() * .1) : n * (1 - S0 - rnd() * .1), x0 = rnd() * n, len = n * (.08 + rnd() * .22) * (top ? 1 : -1), dx = (rnd() - .5) * n * .12;
+      x.strokeStyle = (rnd() < .5 ? 'rgba(255,255,255,' : 'rgba(0,0,0,') + (.07 + rnd() * .1) + ')'; x.lineWidth = 8 + rnd() * 18;
+      x.beginPath(); x.moveTo(x0, y0); x.quadraticCurveTo(x0 + dx, y0 + len * .5, x0 + dx * 1.6, y0 + len); x.stroke();
+    }
+    // soften the creases (box blur on the height field) before the crisp seal ridges go on top
+    var im = x.getImageData(0, 0, n, n), a = im.data, tmp = new Float32Array(n * n), R = 4, q, w;
+    for (var py = 0; py < n; py++) for (var px = 0; px < n; px++) { q = 0; for (w = -R; w <= R; w++) q += a[(py * n + ((px + w + n) % n)) * 4]; tmp[py * n + px] = q / (2 * R + 1); }
+    for (py = 0; py < n; py++) for (px = 0; px < n; px++) { q = 0; for (w = -R; w <= R; w++) q += tmp[((py + w + n) % n) * n + px]; a[(py * n + px) * 4] = a[(py * n + px) * 4 + 1] = a[(py * n + px) * 4 + 2] = q / (2 * R + 1); }
+    x.putImageData(im, 0, 0);
+    for (var s = 0; s < 2; s++) for (var r = 0; r < 9; r++) { var yy = (s ? n * (1 - S0) : 0) + (r + .5) * n * S0 / 9; x.fillStyle = 'rgba(255,255,255,.5)'; x.fillRect(0, yy - 1.2, n, 2.4); x.fillStyle = 'rgba(0,0,0,.4)'; x.fillRect(0, yy + 1.6, n, 1.6); }
+    var src = x.getImageData(0, 0, n, n).data, out = x.createImageData(n, n), d = out.data, h = function (px, py) { return src[(((py + n) % n) * n + ((px + n) % n)) * 4] / 255; };
+    for (var py = 0; py < n; py++) for (var px = 0; px < n; px++) {
+      var gx = (h(px + 1, py) - h(px - 1, py)) * 5, gy = (h(px, py + 1) - h(px, py - 1)) * 5, l = Math.sqrt(gx * gx + gy * gy + 1), o = (py * n + px) * 4;
+      d[o] = (-gx / l * .5 + .5) * 255; d[o + 1] = (gy / l * .5 + .5) * 255; d[o + 2] = (1 / l * .5 + .5) * 255; d[o + 3] = 255;
+    }
+    x.putImageData(out, 0, 0); return new THREE.CanvasTexture(c);
+  }
+  function dot(stops) {
+    var c = document.createElement('canvas'); c.width = c.height = 128; var x = c.getContext('2d'), g = x.createRadialGradient(64, 64, 0, 64, 64, 64);
+    stops.forEach(function (st) { g.addColorStop(st[0], st[1]); }); x.fillStyle = g; x.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(c);
+  }
+  var NS = 46, glow, shadow, sparks, sparkV = [], fxT = -1, hover = { x: 0, y: 0, tx: 0, ty: 0 };
+  function buildFx() {
+    glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: dot([[0, 'rgba(255,250,235,1)'], [.35, 'rgba(255,214,160,.55)'], [1, 'rgba(255,190,140,0)']]), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0 }));
+    glow.position.set(0, yTear + .05, -.02); glow.scale.set(.1, .1, 1); group.add(glow);
+    shadow = new THREE.Mesh(new THREE.PlaneGeometry(4.6, .9), new THREE.MeshBasicMaterial({ map: dot([[0, 'rgba(60,40,70,.5)'], [1, 'rgba(60,40,70,0)']]), transparent: true, depthWrite: false, opacity: .55 }));
+    shadow.position.set(0, -H / 2 - .32, -.6); scene.add(shadow);
+    var g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(NS * 3), 3));
+    sparks = new THREE.Points(g, new THREE.PointsMaterial({ map: dot([[0, 'rgba(255,255,255,1)'], [.4, 'rgba(255,225,170,.6)'], [1, 'rgba(255,200,150,0)']]), size: .16, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }));
+    sparks.frustumCulled = false; scene.add(sparks);
+  }
+  function burst() {
+    var p = sparks.geometry.attributes.position, sc = group.scale.x; sparkV = [];
+    for (var i = 0; i < NS; i++) { var u = Math.random() * 2 - 1; p.setXYZ(i, u * W / 2 * sc, group.position.y + yTear * sc, .3); sparkV.push([u * 1.6 + (Math.random() - .5), 2.2 + Math.random() * 3.4, Math.random() * .6]); }
+    p.needsUpdate = true; fxT = 0;
+  }
+  function fx(dt) {
+    hover.x += (hover.tx - hover.x) * (1 - Math.exp(-dt * 6)); hover.y += (hover.ty - hover.y) * (1 - Math.exp(-dt * 6));
+    if (shadow) { var idle = pack.state === 'idle'; shadow.material.opacity += ((idle ? .55 : 0) - shadow.material.opacity) * (1 - Math.exp(-dt * 6)); shadow.scale.x = (.55 + .45 * Math.abs(Math.cos(group.rotation.y))) * group.scale.x; shadow.position.y = (-H / 2 - .32) * base; }
+    if (fxT < 0 || !sparks) return;
+    fxT += dt; var p = sparks.geometry.attributes.position;
+    for (var i = 0; i < NS; i++) { var v = sparkV[i]; v[1] -= 4.2 * dt; p.setXYZ(i, p.getX(i) + v[0] * dt, p.getY(i) + v[1] * dt, p.getZ(i) + v[2] * dt); }
+    p.needsUpdate = true; sparks.material.opacity = clamp(1.25 - fxT / 1.1, 0, 1); if (fxT > 1.4) fxT = -1;
+  }
   var mats = [], group = new THREE.Group(), tab = new THREE.Group(), tabIn = new THREE.Group();
   function build() {
-    var mk = function (tex) { var m = new THREE.MeshStandardMaterial({ map: tex, metalness: .78, roughness: .3, envMapIntensity: 1.25, alphaTest: .5 }); mats.push(m); return m; };
+    var nm = wrinkles(), mk = function (tex) { var m = new THREE.MeshPhysicalMaterial({ map: tex, metalness: .9, roughness: .22, envMapIntensity: 1.55, clearcoat: .55, clearcoatRoughness: .3, normalMap: nm, normalScale: new THREE.Vector2(.5, .5), alphaTest: .5 }); mats.push(m); return m; };
     var mf = mk(foil(false)), mb = mk(foil(true)), gb = faceGeo(0, S1, 60), gt = faceGeo(S1, 1, 4);
     var b1 = new THREE.Mesh(gb, mf), b2 = new THREE.Mesh(gb, mb); b2.rotation.y = Math.PI;
     var t1 = new THREE.Mesh(gt, mf), t2 = new THREE.Mesh(gt, mb); t2.rotation.y = Math.PI;
     tabIn.add(t1, t2); tabIn.position.set(-W / 2, -yTear, 0); tab.add(tabIn); tab.position.set(W / 2, yTear, 0);
-    group.add(b1, b2, tab); scene.add(group);
+    group.add(b1, b2, tab); scene.add(group); buildFx();
   }
   var base = 1, size = { w: 1, h: 1 };
   function resize() {
@@ -279,6 +362,8 @@ var pack = { ok: false, state: 'idle', rot: 0, vel: 0, auto: true, lastTouch: 0,
     camera.aspect = size.w / size.h; camera.updateProjectionMatrix();
     var visW = 2 * camera.position.z * Math.tan(camera.fov * Math.PI / 360) * camera.aspect; base = Math.min(1, visW / (W * 1.5));
     if (pack.state === 'idle') group.scale.setScalar(base);
+    var visH = 2 * camera.position.z * Math.tan(camera.fov * Math.PI / 360);
+    stage.style.setProperty('--pack-b', (size.h * (.5 + (.12 + H / 2 * base) / visH)).toFixed(0) + 'px'); stage.style.setProperty('--pack-w', (W * base / visH * size.h).toFixed(0) + 'px');
   }
   var v3 = new THREE.Vector3(), drag = null, pulling = null, pullP = 0, t0 = performance.now();
   function project(x, y, z) { v3.set(x, y, z).applyMatrix4(group.matrixWorld).project(camera); return [(v3.x + 1) / 2 * size.w, (1 - v3.y) / 2 * size.h]; }
@@ -288,9 +373,10 @@ var pack = { ok: false, state: 'idle', rot: 0, vel: 0, auto: true, lastTouch: 0,
     if (pack.state === 'idle') {
       if (drag) { pack.auto = false; }
       else if (pulling) { pack.rot += (Math.round(pack.rot / TAU) * TAU - pack.rot) * (1 - Math.exp(-dt * 12)); pack.vel = 0; }
-      else if (pack.auto) { pack.rot = lerp(pack.rot, Math.round(pack.rot / TAU) * TAU + Math.sin(t * .8) * .42, 1 - Math.exp(-dt * 4)); }
+      else if (pack.auto) { pack.rot = lerp(pack.rot, Math.round(pack.rot / TAU) * TAU + Math.sin(t * .7) * .26 + hover.x * .5, 1 - Math.exp(-dt * 4)); }
       else { pack.rot += pack.vel * f; pack.vel *= Math.pow(.95, f); if (now - pack.lastTouch > 3500 && Math.abs(pack.vel) < .002) pack.auto = true; }
-      group.rotation.y = pack.rot; group.rotation.x = Math.sin(t * .6) * .05; group.position.y = -.12 + Math.sin(t * 1.1) * .05;
+      group.rotation.y = pack.rot; group.rotation.x = Math.sin(t * .6) * .04 + hover.y * .22; group.rotation.z = Math.sin(t * .9) * .012; group.position.y = -.12 + Math.sin(t * 1.1) * .07;
+      dl.position.x = 2.5 + Math.sin(t * .55) * 4.5;
       tab.rotation.z = lerp(tab.rotation.z, -pullP * .55, 1 - Math.exp(-dt * 20));
       group.updateMatrixWorld();
       var a = project(-W / 2 + .1, yTear + (H / 2 - yTear) * .5, .03), b = project(W / 2, yTear, .03), facing = Math.cos(pack.rot);
@@ -298,12 +384,15 @@ var pack = { ok: false, state: 'idle', rot: 0, vel: 0, auto: true, lastTouch: 0,
       pull.style.transform = 'translate(' + (a[0] + pullP * pack.px * .8).toFixed(1) + 'px,' + (a[1] - pullP * 30).toFixed(1) + 'px) translateY(-50%)';
       pull.style.opacity = clamp((facing - .55) / .3, 0, 1); pull.style.pointerEvents = facing > .7 ? 'auto' : 'none';
     }
+    fx(dt);
     renderer.render(scene, camera);
     pack.raf = requestAnimationFrame(frame);
   }
   function run() { if (!pack.raf && pack.state !== 'done' && pack.visible) { pack.last = 0; pack.raf = requestAnimationFrame(frame); } }
   canvas.addEventListener('pointerdown', function (e) { if (pack.state !== 'idle') return; drag = { x: e.clientX, id: e.pointerId }; canvas.setPointerCapture(e.pointerId); });
   canvas.addEventListener('pointermove', function (e) { if (!drag || e.pointerId !== drag.id) return; var dx = e.clientX - drag.x; drag.x = e.clientX; pack.vel = dx * .012; pack.rot += pack.vel; pack.lastTouch = performance.now(); });
+  stage.addEventListener('pointermove', function (e) { if (pack.state !== 'idle' || e.pointerType === 'touch') return; var r = stage.getBoundingClientRect(); hover.tx = clamp((e.clientX - r.left) / r.width * 2 - 1, -1, 1); hover.ty = clamp((e.clientY - r.top) / r.height * 2 - 1, -1, 1); });
+  stage.addEventListener('pointerleave', function () { hover.tx = hover.ty = 0; });
   var stop = function (e) { if (drag && e.pointerId === drag.id) { drag = null; pack.lastTouch = performance.now(); } };
   canvas.addEventListener('pointerup', stop); canvas.addEventListener('pointercancel', stop);
   pull.addEventListener('pointerdown', function (e) { if (pack.state !== 'idle') return; pulling = { x: e.clientX, id: e.pointerId, moved: false }; pull.setPointerCapture(e.pointerId); e.preventDefault(); });
@@ -313,24 +402,30 @@ var pack = { ok: false, state: 'idle', rot: 0, vel: 0, auto: true, lastTouch: 0,
   pull.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
 
   async function open() {
-    if (pack.state !== 'idle') return; pack.state = 'opening'; stage.classList.add('opening');
-    var r0 = pack.rot, r1 = Math.round(r0 / TAU) * TAU, z0 = tab.rotation.z, p0 = pullP;
-    mats.forEach(function (m) { m.transparent = false; });
-    await tween(520, function (k) {
-      var e = easeOut(k); group.rotation.y = lerp(r0, r1, e); group.rotation.x *= .9;
-      tab.rotation.z = lerp(z0, -1.25, e); tab.position.x = W / 2 - easeIn(k) * 5; tab.position.y = yTear + e * 1.4; tab.position.z = e * .6;
+    if (pack.state !== 'idle') return; pack.state = 'opening'; stage.classList.add('opening'); hover.tx = hover.ty = 0;
+    var r0 = pack.rot, r1 = Math.round(r0 / TAU) * TAU, z0 = tab.rotation.z, x0 = group.rotation.x, zr = group.rotation.z;
+    // 1. face the viewer with a small squeeze, 2. rip the seal off with a burst of light
+    await tween(280, function (k) { var e = easeOut(k); group.rotation.y = lerp(r0, r1, e); group.rotation.x = lerp(x0, 0, e); group.rotation.z = lerp(zr, 0, e); group.scale.set(base * (1 + .05 * Math.sin(k * Math.PI)), base * (1 - .04 * Math.sin(k * Math.PI)), base); });
+    pack.rot = r1; burst();
+    await tween(560, function (k) {
+      var e = easeOut(k);
+      tab.rotation.z = lerp(z0, -1.5, e); tab.position.set(W / 2 + easeIn(k) * 4.5, yTear + e * 1.9, e * .8); tab.rotation.x = e * .9;
+      glow.material.opacity = .85 * Math.sin(Math.min(1, k * 1.6) * Math.PI / 2); glow.scale.set(lerp(.4, 3.8, e), lerp(.3, 1.7, e), 1);
+      group.position.x = Math.sin(k * 22) * .03 * (1 - k);
     });
-    tab.visible = false; pack.rot = r1;
+    tab.visible = false; group.position.x = 0;
+    // 3. the pack comes forward, cards rise out of the glowing mouth
     var y0 = group.position.y;
-    await tween(620, function (k) { var e = easeIO(k); group.position.y = lerp(y0, -2, e); group.scale.setScalar(base * lerp(1, 1.22, e)); group.rotation.x = lerp(group.rotation.x, -.08, e); });
-    await deal(true);
-    await tween(560, function (k) { var e = easeIn(k); group.position.y = lerp(-2, -7.5, e); group.rotation.z = e * .2; });
-    pack.state = 'done'; pullP = p0 * 0;
-    toRing();
+    await tween(640, function (k) { var e = easeIO(k); group.position.y = lerp(y0, -1.9, e); group.scale.setScalar(base * lerp(1, 1.3, e)); group.rotation.x = lerp(0, -.1, e); glow.scale.set(lerp(3.8, 3.2, e), lerp(1.7, 1.2, e), 1); });
+    await riseFromPack();
+    // 4. the pack drops away while the first card takes the stage
+    var fall = tween(620, function (k) { var e = easeIn(k); group.position.y = lerp(-1.9, -8, e); group.rotation.z = e * .22; glow.material.opacity = .85 * (1 - k); });
+    await showcase(); await fall;
+    pack.state = 'done'; toRing();
   }
   function reset() {
     pack.state = 'idle'; pack.rot = 0; pack.vel = 0; pack.auto = true; pullP = 0; tab.visible = true; tab.rotation.set(0, 0, 0); tab.position.set(W / 2, yTear, 0);
-    group.position.set(0, 0, 0); group.rotation.set(0, 0, 0); group.scale.setScalar(base); run();
+    group.position.set(0, 0, 0); group.rotation.set(0, 0, 0); group.scale.setScalar(base); glow.material.opacity = 0; glow.scale.set(.1, .1, 1); sparks.material.opacity = 0; fxT = -1; run();
   }
   pack.open = open; pack.reset = reset; pack.ok = true;
   var fontsReady = document.fonts && document.fonts.load ? Promise.all([document.fonts.load('190px "VD Brush"', '视像维度社团成员卡包'), document.fonts.load('50px "VD Latin"', 'VISION'), document.fonts.load('34px "VD Serif"', '视觉设计')]).catch(function () {}) : Promise.resolve();

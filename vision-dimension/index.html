@@ -55,6 +55,31 @@
 <section class="team" id="team">
   <div class="sec-head team-head"><em>02</em><h2>社团成员<span>TEAM</span></h2></div>
   <div class="stage" id="stage">
+    <div class="stage-bg" aria-hidden="true">
+      <div class="bg-aura"></div>
+      <p class="bg-word bg-w1">VISION</p>
+      <p class="bg-word bg-w2">DIMENSION</p>
+      <svg class="bg-orbits" viewBox="0 0 1000 1000">
+        <defs>
+          <linearGradient id="bo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6f66a3"/><stop offset=".55" stop-color="#f0c19a"/><stop offset="1" stop-color="#d98f63"/></linearGradient>
+          <radialGradient id="bp"><stop offset="0" stop-color="#fff6ea"/><stop offset="1" stop-color="#d98f63"/></radialGradient>
+        </defs>
+        <g transform="rotate(-18 500 500)" fill="none" stroke="url(#bo)">
+          <ellipse cx="500" cy="500" rx="470" ry="170" stroke-width="1.4"/>
+          <ellipse cx="500" cy="500" rx="390" ry="128" stroke-width=".8" stroke-dasharray="3 9"/>
+          <ellipse cx="500" cy="500" rx="300" ry="92" stroke-width=".8" opacity=".7"/>
+          <circle r="7" fill="url(#bp)" stroke="none"><animateMotion dur="26s" repeatCount="indefinite" path="M30,500a470,170 0 1,0 940,0a470,170 0 1,0 -940,0"/></circle>
+          <circle r="4" fill="#8f86b8" stroke="none"><animateMotion dur="17s" repeatCount="indefinite" path="M890,500a390,128 0 1,1 -780,0a390,128 0 1,1 780,0"/></circle>
+          <circle r="3" fill="#c9788a" stroke="none"><animateMotion dur="11s" repeatCount="indefinite" path="M200,500a300,92 0 1,0 600,0a300,92 0 1,0 -600,0"/></circle>
+        </g>
+        <g fill="#d98f63"><path d="M118 214l5 15 15 5-15 5-5 15-5-15-15-5 15-5z"/><path d="M872 742l4 11 11 4-11 4-4 11-4-11-11-4 11-4z" opacity=".8"/><path d="M842 168l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#8f86b8"/><path d="M150 760l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#8f86b8" opacity=".8"/></g>
+      </svg>
+      <div class="bg-ped"><i></i></div>
+      <span class="bg-mark m1"></span><span class="bg-mark m2"></span><span class="bg-mark m3"></span><span class="bg-mark m4"></span>
+      <p class="bg-tag bg-t1"><b>MEMBER PACK</b>N° 01 · 2026</p>
+      <p class="bg-tag bg-t2"><b>6 CARDS</b>指导教师 2 · 社长 1 · 核心成员 3</p>
+      <p class="bg-cn">视像维度</p>
+    </div>
     <div class="team-title" id="teamTitle"><small>Vision Dimension</small><strong>Our Team</strong><span>社团成员 · 6 CARDS</span></div>
     <div class="cards" id="cards"></div>
     <canvas id="packCanvas" aria-hidden="true"></canvas>
