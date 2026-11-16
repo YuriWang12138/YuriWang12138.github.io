@@ -169,7 +169,7 @@ ul,ol{list-style:none}
 .focus-go{position:absolute;left:calc(50% + var(--cw)*.82);top:50%;transform:translateY(-50%);font-size:16px;letter-spacing:.3em;padding:10px 4px;border-bottom:1px solid var(--ink);white-space:nowrap}
 .focus-go i{font-style:normal;display:inline-block;transition:transform .3s var(--ease)}
 .focus-go:hover i{transform:translateX(8px)}
-.focus-close{position:absolute;right:clamp(16px,4vw,56px);top:20px;width:44px;height:44px;border:1px solid var(--line);border-radius:50%;font-size:22px;line-height:1}
+.focus-close{position:absolute;right:clamp(16px,4vw,56px);top:84px;background:rgba(237,228,222,.8);width:44px;height:44px;border:1px solid var(--line);border-radius:50%;font-size:22px;line-height:1}
 .stage.focus .focus-go,.stage.focus .focus-close{pointer-events:auto}
 
 /* ---------- org ---------- */

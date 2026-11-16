@@ -65,10 +65,27 @@ function certHtml(c, i) { return '<figure class="cert" tabindex="0" role="button
     $$('#certGrid .cert').forEach(function (el) { el.classList.toggle('hide', !(f === 'all' || (f === 'mentor' ? el.dataset.mentor === '1' : el.dataset.comp === f && el.dataset.mentor !== '1'))); });
   });
 })();
+/* overlays: keep keyboard focus inside the open one and give it back on close */
+var modals = [];
+function modalOpen(el, focusEl) {
+  var others = Array.prototype.filter.call(document.body.children, function (c) { return c !== el && c.tagName !== 'SCRIPT' && !c.inert; });
+  modals.push({ el: el, prev: document.activeElement, others: others, wasInert: el.inert });
+  others.forEach(function (c) { c.inert = true; });
+  el.inert = false;
+  if (focusEl) focusEl.focus({ preventScroll: true });
+}
+function modalClose(el) {
+  for (var i = modals.length - 1; i >= 0; i--) if (modals[i].el === el) break;
+  if (i < 0) return;
+  var m = modals.splice(i, 1)[0];
+  m.others.forEach(function (c) { c.inert = false; });
+  el.inert = m.wasInert;
+  if (m.prev && m.prev.focus && document.contains(m.prev)) m.prev.focus({ preventScroll: true });
+}
 var LB = { list: [], i: 0, el: $('#lightbox') };
 function lbShow(i) { LB.i = (i + LB.list.length) % LB.list.length; var c = LB.list[LB.i]; $('#lbImg').src = asset('assets/img/certs/' + c.id + '.webp'); $('#lbCap').textContent = c.title + '　' + c.sub; }
-function lbOpen(list, i) { LB.list = list; lbShow(i); LB.el.classList.add('on'); LB.el.setAttribute('aria-hidden', 'false'); }
-function lbClose() { LB.el.classList.remove('on'); LB.el.setAttribute('aria-hidden', 'true'); }
+function lbOpen(list, i) { LB.list = list; lbShow(i); LB.el.classList.add('on'); LB.el.setAttribute('aria-hidden', 'false'); modalOpen(LB.el, $('.lb-close', LB.el)); }
+function lbClose() { LB.el.classList.remove('on'); LB.el.setAttribute('aria-hidden', 'true'); modalClose(LB.el); }
 LB.el.addEventListener('click', function (e) { if (e.target.closest('.lb-prev')) lbShow(LB.i - 1); else if (e.target.closest('.lb-next')) lbShow(LB.i + 1); else if (e.target.id !== 'lbImg') lbClose(); });
 document.addEventListener('click', function (e) {
   var c = e.target.closest('.cert'); if (!c) return;
@@ -347,9 +364,9 @@ function openProfile(i) {
     '<div class="pf-meta">' + m.tags.map(function (t) { return '<span>' + t + '</span>'; }).join('') + '</div>' +
     '<h3 class="pf-h"><b>' + (m.guidesAll ? '指导获奖' : '获奖记录') + '</b>AWARDS · ' + rows.length + '</h3><ul class="pf-list">' + rows.join('') + '</ul>' +
     (list.length ? '<h3 class="pf-h"><b>证书</b>CERTIFICATES</h3><div class="pf-certs">' + list.map(function (ci) { return certHtml(CERTS[ci], ci); }).join('') + '</div>' : '');
-  profile.scrollTop = 0; profile.classList.add('on'); profile.setAttribute('aria-hidden', 'false'); document.body.classList.add('locked');
+  profile.scrollTop = 0; profile.classList.add('on'); profile.setAttribute('aria-hidden', 'false'); document.body.classList.add('locked'); modalOpen(profile, $('#profileBack'));
 }
-function closeProfile() { profile.classList.remove('on'); profile.setAttribute('aria-hidden', 'true'); document.body.classList.remove('locked'); }
+function closeProfile() { profile.classList.remove('on'); profile.setAttribute('aria-hidden', 'true'); document.body.classList.remove('locked'); modalClose(profile); }
 $('#profileBack').onclick = closeProfile;
 $('#focusClose').onclick = function (e) { e.stopPropagation(); unfocus(); };
 function setCardTabs(on) { cards.forEach(function (c) { c.tabIndex = on ? 0 : -1; }); }
