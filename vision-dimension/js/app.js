@@ -2,11 +2,11 @@
 'use strict';
 var D = window.VD, $ = function (s, r) { return (r || document).querySelector(s); }, $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
 var ASSETS = window.VD_ASSETS || {}, asset = function (p) { return ASSETS[p] || p; };
-var TAU = Math.PI * 2, reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, reduce ? 0 : ms); }); };
+var TAU = Math.PI * 2;
+var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
 var lerp = function (a, b, k) { return a + (b - a) * k; }, clamp = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
 var easeOut = function (k) { return 1 - Math.pow(1 - k, 3); }, easeIn = function (k) { return k * k * k; }, easeIO = function (k) { return k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2; };
-function tween(ms, fn) { return new Promise(function (res) { if (reduce) { fn(1); return res(); } var t0 = performance.now(); (function step(t) { var k = clamp((t - t0) / ms, 0, 1); fn(k); k < 1 ? requestAnimationFrame(step) : res(); })(t0); }); }
+function tween(ms, fn) { return new Promise(function (res) { var t0 = performance.now(); (function step(t) { var k = clamp((t - t0) / ms, 0, 1); fn(k); k < 1 ? requestAnimationFrame(step) : res(); })(t0); }); }
 var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
 var byId = {}; D.members.forEach(function (m) { byId[m.id] = m; });
 var levelName = function (a) { return a.level === '国赛' ? '全国总决赛' : (a.comp === 'lnwc' ? '省赛' : '辽宁赛区'); };
