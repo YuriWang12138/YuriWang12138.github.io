@@ -66,7 +66,7 @@ window.VD = {
       skills: [['flag','竞赛跟进'],['list','信息整理'],['users','人员分工'],['box','后勤保障']],
       flavor: '《舞狮迎春》《下一站·窗景》第一作者。',
       bio: '视像维度核心成员，主管项目管理，负责竞赛跟进、信息整理与人员分工。作为第一作者完成《舞狮迎春》《下一站·窗景》《一线向天》《无声守望》。',
-      theme: ['#8f2450', '#e2577f', '#ffd5e0', '#fff1f5'], sign: true },
+      theme: ['#0f3d6e', '#3a8fd9', '#cfeaff', '#eff8ff'], sign: true },
     { id: 'zxy', key: 'zouxinying', name: '邹欣颖', en: 'ZOU XINYING', role: '核心成员', roleEn: 'CORE MEMBER',
       info: [['所属','管理学院'],['年级','2025 级']], tags: ['鞍山师范学院','管理学院','2025 级'], duty: '视觉设计及影像', dutyShort: '视觉与影像',
       skills: [['layout','平面设计'],['eye','品牌设计'],['film','视频剪辑'],['spark','AIGC']],
