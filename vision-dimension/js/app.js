@@ -53,7 +53,7 @@ function tally(list) { var t = { 国赛: 0, 省赛: 0 }; list.forEach(function (
 var CERTS = [];
 D.awards.forEach(function (a) { a.certs.forEach(function (c) { CERTS.push({ id: c, comp: a.comp, title: D.comps[a.comp].short + ' · ' + levelName(a) + a.prize, sub: '《' + D.works[a.work] + '》', by: a.by, award: true }); }); });
 D.mentorAwards.forEach(function (a) { CERTS.push({ id: a.cert, comp: a.comp, mentor: true, title: D.comps[a.comp].short + ' · ' + levelName(a) + '优秀指导教师', sub: '王诗凯' + (a.work ? ' · 《' + D.works[a.work] + '》' : ''), by: ['wsk'] }); });
-function certHtml(c, i) { return '<figure class="cert" data-i="' + i + '" data-comp="' + c.comp + '" data-mentor="' + (c.mentor ? 1 : 0) + '"><div class="ph"><img loading="lazy" src="' + asset('assets/img/certs/' + c.id + '-thumb.webp') + '" alt="' + esc(c.title + ' ' + c.sub) + '"></div><figcaption><b>' + esc(c.title) + '</b><span>' + esc(c.sub) + '</span></figcaption></figure>'; }
+function certHtml(c, i) { return '<figure class="cert" tabindex="0" role="button" data-i="' + i + '" data-comp="' + c.comp + '" data-mentor="' + (c.mentor ? 1 : 0) + '"><div class="ph"><img loading="lazy" src="' + asset('assets/img/certs/' + c.id + '-thumb.webp') + '" alt="' + esc(c.title + ' ' + c.sub) + '"></div><figcaption><b>' + esc(c.title) + '</b><span>' + esc(c.sub) + '</span></figcaption></figure>'; }
 (function buildCerts() {
   $('#certGrid').innerHTML = CERTS.map(certHtml).join('');
   var fs = [['all', '全部 ' + CERTS.length]].concat(Object.keys(D.comps).map(function (k) { return [k, D.comps[k].short]; })).concat([['mentor', '优秀指导教师']]);
@@ -80,7 +80,7 @@ document.addEventListener('click', function (e) {
 var stage = $('#stage'), cardsEl = $('#cards'), N = D.members.length;
 cardsEl.innerHTML = D.members.map(function (m, i) {
   var t = tally(awardsOf(m)), th = m.theme;
-  return '<article class="card' + (m.light ? ' light' : '') + '" data-i="' + i + '" style="--c1:' + th[0] + ';--c2:' + th[1] + ';--c3:' + th[2] + ';--tx:' + th[3] + '"><div class="card-in">' +
+  return '<article class="card' + (m.light ? ' light' : '') + '" tabindex="-1" role="button" aria-label="' + m.name + ' · ' + m.role + '" data-i="' + i + '" style="--c1:' + th[0] + ';--c2:' + th[1] + ';--c3:' + th[2] + ';--tx:' + th[3] + '"><div class="card-in">' +
     '<div class="card-art"><div class="hill"></div><div class="hill"></div><img class="card-portrait" src="' + asset('assets/img/members/' + m.key + '-card.webp') + '" alt="' + m.name + '" draggable="false"><div class="fade"></div></div>' +
     '<header class="card-head"><div class="card-avatar"><img src="' + asset('assets/img/members/' + m.key + '-avatar.webp') + '" alt="" draggable="false"></div><div class="card-ribbon"><span class="card-class">' + m.role + ' — ' + m.roleEn + '</span><strong class="card-name">' + m.name + '</strong></div></header>' +
     '<div class="card-body"><div class="card-rows">' + m.info.map(function (r) { return '<span>' + r[0] + '：<b>' + r[1] + '</b></span>'; }).join('') + '<span>分工：<b>' + (m.dutyShort || m.duty) + '</b></span><span>战绩：<b class="stars">国赛' + t['国赛'] + ' · 省赛' + t['省赛'] + '</b></span></div>' +
@@ -184,7 +184,7 @@ async function deal(fromPack) {
   await sleep(fromPack ? 520 : 300);
 }
 async function toRing() {
-  stage.classList.add('opened', 'ring'); stage.classList.remove('opening'); $('#team').classList.add('opened'); ring.mode = 'ring';
+  stage.classList.add('opened', 'ring'); stage.classList.remove('opening'); $('#team').classList.add('opened'); ring.mode = 'ring'; setCardTabs(true);
   cards.forEach(function (c) { c.classList.add('t'); }); applyRing();
   await sleep(1050);
   if (ring.mode === 'ring') cards.forEach(function (c) { c.classList.remove('t'); });
@@ -326,7 +326,7 @@ $('#skipPack').onclick = skipToRing;
 if (!pack.ok) { stage.classList.add('opened'); new IntersectionObserver(function (es, ob) { if (es[0].isIntersecting) { ob.disconnect(); skipToRing(); } }, { threshold: .4 }).observe(stage); }
 $('#repack').onclick = function () {
   if (!pack.ok) return;
-  ring.mode = 'pack'; stage.classList.remove('opened', 'ring', 'focus', 'opening'); $('#team').classList.remove('opened'); $('#packCanvas').style.display = '';
+  ring.mode = 'pack'; stage.classList.remove('opened', 'ring', 'focus', 'opening'); $('#team').classList.remove('opened'); setCardTabs(false); $('#packCanvas').style.display = '';
   cards.forEach(function (c) { c.classList.remove('t', 'hot'); c.style.opacity = 0; });
   pack.reset();
 };
@@ -352,7 +352,19 @@ function openProfile(i) {
 function closeProfile() { profile.classList.remove('on'); profile.setAttribute('aria-hidden', 'true'); document.body.classList.remove('locked'); }
 $('#profileBack').onclick = closeProfile;
 $('#focusClose').onclick = function (e) { e.stopPropagation(); unfocus(); };
+function setCardTabs(on) { cards.forEach(function (c) { c.tabIndex = on ? 0 : -1; }); }
+function activateCard(i) {
+  if (ring.mode === 'focus') { if (i === ring.focus) openProfile(i); else unfocus(); }
+  else if (ring.mode === 'ring') { if (i === frontIndex()) { ring.target = ring.pos = Math.round(ring.target); focusCard(i); } else rotateTo(i); }
+}
+cardsEl.addEventListener('focusin', function (e) { var c = e.target.closest('.card'); if (c && ring.mode === 'ring' && c.matches(':focus-visible')) rotateTo(+c.dataset.i); });
+stage.addEventListener('scroll', function () { stage.scrollLeft = stage.scrollTop = 0; });
 window.addEventListener('keydown', function (e) {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.closest) {
+    var kc = e.target.closest('.card'), kf = e.target.closest('.cert');
+    if (kc) { e.preventDefault(); activateCard(+kc.dataset.i); return; }
+    if (kf) { e.preventDefault(); kf.click(); return; }
+  }
   if (e.key === 'Escape') { if (LB.el.classList.contains('on')) lbClose(); else if (profile.classList.contains('on')) closeProfile(); else unfocus(); }
   else if (LB.el.classList.contains('on')) { if (e.key === 'ArrowLeft') lbShow(LB.i - 1); if (e.key === 'ArrowRight') lbShow(LB.i + 1); }
   else if (ring.mode === 'ring' && !profile.classList.contains('on')) { var r = stage.getBoundingClientRect(); if (r.top < innerHeight * .6 && r.bottom > innerHeight * .4) { if (e.key === 'ArrowLeft') step(-1); if (e.key === 'ArrowRight') step(1); } }
