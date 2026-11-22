@@ -9,7 +9,9 @@ var easeOut = function (k) { return 1 - Math.pow(1 - k, 3); }, easeIn = function
 function tween(ms, fn) { return new Promise(function (res) { var t0 = performance.now(); (function step(t) { var k = clamp((t - t0) / ms, 0, 1); fn(k); k < 1 ? requestAnimationFrame(step) : res(); })(t0); }); }
 var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
 var byId = {}; D.members.forEach(function (m) { byId[m.id] = m; });
-var levelName = function (a) { return a.level === '国赛' ? '全国总决赛' : (a.comp === 'lnwc' ? '省赛' : '辽宁赛区'); };
+var levelName = function (a) { var lv = D.comps[a.comp].lv; return lv ? lv[a.level] : a.level; };
+var mentorOf = function (a) { return a.mentor === undefined ? '王诗凯' : a.mentor; };
+var nameOf = function (id) { return byId[id] ? byId[id].name : id; };
 var prizeText = function (a) { return a.prize + (a.n > 1 ? ' ×' + a.n : ''); };
 var ICON = {
   flag: 'M5 21V4h11l-2 4 2 4H5', eye: 'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zm10 3a3 3 0 100-6 3 3 0 000 6z',
@@ -21,13 +23,13 @@ var ICON = {
   spark: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3zM19 16l.7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7L19 16z',
   list: 'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01', box: 'M3 8l9-5 9 5v8l-9 5-9-5V8zm0 0l9 5 9-5M12 13v8'
 };
-function awardsOf(m) { return D.awards.filter(function (a) { return m.guidesAll || a.by.indexOf(m.id) >= 0; }); }
+function awardsOf(m) { return D.awards.filter(function (a) { return m.guidesAll ? mentorOf(a) === m.name : a.by.indexOf(m.id) >= 0; }); }
 function tally(list) { var t = { 国赛: 0, 省赛: 0 }; list.forEach(function (a) { t[a.level] += a.n || 1; }); return t; }
 
 /* ================= static sections ================= */
 (function buildStatic() {
   var t = tally(D.awards), workIds = Object.keys(D.works);
-  $('#stats').innerHTML = [[t['国赛'], '全国总决赛奖项'], [t['省赛'], '省级赛事奖项'], [D.mentorAwards.length, '优秀指导教师'], [workIds.length, '获奖作品']]
+  $('#stats').innerHTML = [[t['国赛'], '国家级奖项'], [t['省赛'], '省级奖项'], [D.mentorAwards.length, '优秀指导教师'], [workIds.length, '获奖作品']]
     .map(function (s) { return '<li><b data-n="' + s[0] + '">0</b><span>' + s[1] + '</span></li>'; }).join('');
   var mq = workIds.map(function (w) { return '<span>《' + esc(D.works[w]) + '》</span><i>✦</i>'; }).join('');
   $('#marquee').innerHTML = mq + mq;
@@ -42,21 +44,21 @@ function tally(list) { var t = { 国赛: 0, 省赛: 0 }; list.forEach(function (
     o.depts.map(function (d) { return '<div class="dept"><em>' + (d.n < 10 ? '0' : '') + d.n + '<small>人</small></em><small>' + d.en + '</small><h3>' + d.name + '</h3><ul>' + d.keys.map(function (k) { return '<li>' + k + '</li>'; }).join('') + '</ul></div>'; }).join('') + '</div></div>';
 
   $('#works').innerHTML = workIds.map(function (w, i) {
-    var as = D.awards.filter(function (a) { return a.work === w; }), names = [];
-    as.forEach(function (a) { a.by.forEach(function (id) { if (names.indexOf(byId[id].name) < 0) names.push(byId[id].name); }); });
-    return '<li><em>' + (i < 9 ? '0' : '') + (i + 1) + '</em><div><h3>《' + esc(D.works[w]) + '》</h3><p>' + names.join(' · ') + '　指导教师 王诗凯</p></div><div class="badges">' +
+    var as = D.awards.filter(function (a) { return a.work === w; }), names = [], ms = [];
+    as.forEach(function (a) { a.by.forEach(function (id) { if (names.indexOf(nameOf(id)) < 0) names.push(nameOf(id)); }); if (mentorOf(a) && ms.indexOf(mentorOf(a)) < 0) ms.push(mentorOf(a)); });
+    return '<li><em>' + (i < 9 ? '0' : '') + (i + 1) + '</em><div><h3>《' + esc(D.works[w]) + '》</h3><p>' + names.map(esc).join(' · ') + (ms.length ? '　指导教师 ' + ms.map(esc).join(' · ') : '') + '</p></div><div class="badges">' +
       as.map(function (a) { return '<span class="badge ' + (a.level === '国赛' ? (a.prize === '一等奖' ? 'g1' : 'g2') : '') + '">' + D.comps[a.comp].short + ' · ' + levelName(a) + '<b>' + prizeText(a) + '</b></span>'; }).join('') + '</div></li>';
   }).join('');
 })();
 
 /* ================= certificates + lightbox ================= */
 var CERTS = [];
-D.awards.forEach(function (a) { a.certs.forEach(function (c) { CERTS.push({ id: c, comp: a.comp, title: D.comps[a.comp].short + ' · ' + levelName(a) + a.prize, sub: '《' + D.works[a.work] + '》', by: a.by, award: true }); }); });
+D.awards.forEach(function (a) { a.certs.forEach(function (c) { CERTS.push({ id: c, comp: a.comp, title: D.comps[a.comp].short + ' · ' + levelName(a) + a.prize, sub: '《' + D.works[a.work] + '》', by: a.by, guide: mentorOf(a), award: true }); }); });
 D.mentorAwards.forEach(function (a) { CERTS.push({ id: a.cert, comp: a.comp, mentor: true, title: D.comps[a.comp].short + ' · ' + levelName(a) + '优秀指导教师', sub: '王诗凯' + (a.work ? ' · 《' + D.works[a.work] + '》' : ''), by: ['wsk'] }); });
 function certHtml(c, i) { return '<figure class="cert" tabindex="0" role="button" data-i="' + i + '" data-comp="' + c.comp + '" data-mentor="' + (c.mentor ? 1 : 0) + '"><div class="ph"><img loading="lazy" src="' + asset('assets/img/certs/' + c.id + '-thumb.webp') + '" alt="' + esc(c.title + ' ' + c.sub) + '"></div><figcaption><b>' + esc(c.title) + '</b><span>' + esc(c.sub) + '</span></figcaption></figure>'; }
 (function buildCerts() {
   $('#certGrid').innerHTML = CERTS.map(certHtml).join('');
-  var fs = [['all', '全部 ' + CERTS.length]].concat(Object.keys(D.comps).map(function (k) { return [k, D.comps[k].short]; })).concat([['mentor', '优秀指导教师']]);
+  var fs = [['all', '全部 ' + CERTS.length]].concat(Object.keys(D.comps).filter(function (k) { return CERTS.some(function (c) { return c.comp === k; }); }).map(function (k) { return [k, D.comps[k].short]; })).concat([['mentor', '优秀指导教师']]);
   $('#filters').innerHTML = fs.map(function (f, i) { return '<button type="button" data-f="' + f[0] + '"' + (i ? '' : ' class="on"') + '>' + f[1] + '</button>'; }).join('');
   $('#filters').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
@@ -448,8 +450,8 @@ if (!pack.ok) $('#repack').style.display = 'none';
 var profile = $('#profile');
 function openProfile(i) {
   var m = D.members[i], as = awardsOf(m), th = m.theme, list = [];
-  CERTS.forEach(function (c, ci) { if (m.guidesAll || c.by.indexOf(m.id) >= 0) list.push(ci); });
-  var rows = as.map(function (a) { return '<li><time>' + a.date + '</time><span>《' + esc(D.works[a.work]) + '》<small>' + D.comps[a.comp].short + ' · ' + a.cat + '</small></span><b>' + levelName(a) + ' ' + prizeText(a) + '</b></li>'; });
+  CERTS.forEach(function (c, ci) { if (m.guidesAll ? (c.mentor || c.guide === m.name) : c.by.indexOf(m.id) >= 0) list.push(ci); });
+  var rows = as.map(function (a) { return '<li><time>' + a.date + '</time><span>《' + esc(D.works[a.work]) + '》<small>' + D.comps[a.comp].short + (a.cat ? ' · ' + a.cat : '') + '</small></span><b>' + levelName(a) + ' ' + prizeText(a) + '</b></li>'; });
   if (m.guidesAll) D.mentorAwards.forEach(function (a) { rows.push('<li><time>2026</time><span>优秀指导教师<small>' + D.comps[a.comp].name + (a.work ? ' · 《' + esc(D.works[a.work]) + '》' : '') + '</small></span><b>' + levelName(a) + '</b></li>'); });
   $('#profileIn').innerHTML =
     '<div class="pf-photo" style="--c1:' + th[0] + ';--c2:' + th[1] + ';--c3:' + th[2] + '"><img src="' + asset('assets/img/members/' + m.key + '-full.webp') + '" alt="' + m.name + '"></div>' +
