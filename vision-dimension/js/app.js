@@ -520,8 +520,13 @@ window.addEventListener('keydown', function (e) {
     else if (!au.paused) { clearUnlock(); ui(true); fade(VOL); }
     else { ui(false); waitForGesture(); }
   }
-  function pauseSelf() { selfPause = true; au.pause(); }
-  au.addEventListener('timeupdate', function () { initialPlayback = false; }, { once: true });
+  function pauseSelf() { if (au.paused) return; selfPause = true; au.pause(); }
+  function markInitialPlayback() {
+    if (au.paused || au.currentTime < .25) return;
+    initialPlayback = false;
+    au.removeEventListener('timeupdate', markInitialPlayback);
+  }
+  au.addEventListener('timeupdate', markInitialPlayback);
   au.addEventListener('pause', function () {
     if (selfPause) { selfPause = false; return; }
     if (initialPlayback && want) { ui(false); waitForGesture(); return; }
