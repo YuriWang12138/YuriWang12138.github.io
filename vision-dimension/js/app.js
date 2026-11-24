@@ -492,7 +492,7 @@ window.addEventListener('keydown', function (e) {
 
 /* ================= background music ================= */
 (function () {
-  var au = $('#bgm'), btn = $('#bgmBtn'), VOL = .55, want = true, raf = 0;
+  var au = $('#bgm'), btn = $('#bgmBtn'), VOL = .55, want = true, selfPause = false, initialPlayback = true, raf = 0;
   var unlockEvents = ['pointerdown', 'keydown', 'touchend'];
   function clearUnlock() { unlockEvents.forEach(function (type) { document.removeEventListener(type, unlock, true); }); }
   function unlock(e) {
@@ -520,12 +520,22 @@ window.addEventListener('keydown', function (e) {
     else if (!au.paused) { clearUnlock(); ui(true); fade(VOL); }
     else { ui(false); waitForGesture(); }
   }
-  au.addEventListener('pause', function () { if (want) { ui(false); waitForGesture(); } });
+  function pauseSelf() { selfPause = true; au.pause(); }
+  au.addEventListener('timeupdate', function () { initialPlayback = false; }, { once: true });
+  au.addEventListener('pause', function () {
+    if (selfPause) { selfPause = false; return; }
+    if (initialPlayback && want) { ui(false); waitForGesture(); return; }
+    want = false; clearUnlock(); ui(false);
+  });
+  au.addEventListener('playing', function () {
+    want = true; clearUnlock(); ui(true);
+    if (au.volume < VOL) fade(VOL);
+  });
   btn.onclick = function () {
-    if (!au.paused) { want = false; ui(false); fade(0, function () { au.pause(); }); }
+    if (!au.paused) { want = false; ui(false); fade(0, pauseSelf); }
     else { want = true; play(); }
   };
-  document.addEventListener('visibilitychange', function () { if (!want) return; if (document.hidden) au.pause(); else play(); });
+  document.addEventListener('visibilitychange', function () { if (!want) return; if (document.hidden) pauseSelf(); else play(); });
   ui(false);
   play();
 })();
