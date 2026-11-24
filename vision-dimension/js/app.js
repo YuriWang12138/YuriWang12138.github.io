@@ -36,8 +36,6 @@ function tally(list) { var t = { 国赛: 0, 省赛: 0 }; list.forEach(function (
 
   var c = D.club;
   $('#clubFacts').innerHTML = c.facts.map(function (f) { return '<div><dt>' + f[0] + '</dt><dd>' + f[1] + '</dd></div>'; }).join('');
-  $('#clubActs').innerHTML = c.activities.map(function (a, i) { return '<li><em>0' + (i + 1) + '</em><div><b>' + a[0] + '</b><span>' + a[1] + '</span></div></li>'; }).join('');
-  $('#clubNote').innerHTML = '选题围绕 <b>' + c.themes.join(' · ') + '</b> 展开；首场活动拟为「<b>' + c.first + '</b>」。' + c.rule;
   var mm = D.members.filter(function (m) { return m.message; })[0];
   $('#msgCard').innerHTML = mm.message.map(function (l) { return '<p>' + esc(l) + '</p>'; }).join('') +
     '<figcaption>' + mm.role + '　' + mm.name + (mm.sign ? '<img src="' + asset('assets/img/sign/' + mm.key + '.png') + '" alt="' + mm.name + '签名">' : '') + '</figcaption>';
@@ -52,9 +50,8 @@ function tally(list) { var t = { 国赛: 0, 省赛: 0 }; list.forEach(function (
     o.depts.map(function (d) { return '<div class="dept"><em>' + (d.n < 10 ? '0' : '') + d.n + '<small>人</small></em><small>' + d.en + '</small><h3>' + d.name + '</h3><ul>' + d.keys.map(function (k) { return '<li>' + k + '</li>'; }).join('') + '</ul></div>'; }).join('') + '</div></div>';
 
   $('#works').innerHTML = workIds.map(function (w, i) {
-    var as = D.awards.filter(function (a) { return a.work === w; }), names = [], ms = [];
-    as.forEach(function (a) { a.by.forEach(function (id) { if (names.indexOf(nameOf(id)) < 0) names.push(nameOf(id)); }); if (mentorOf(a) && ms.indexOf(mentorOf(a)) < 0) ms.push(mentorOf(a)); });
-    return '<li><em>' + (i < 9 ? '0' : '') + (i + 1) + '</em><div><h3>《' + esc(D.works[w]) + '》</h3><p>' + names.map(esc).join(' · ') + (ms.length ? '　指导教师 ' + ms.map(esc).join(' · ') : '') + '</p></div><div class="badges">' +
+    var as = D.awards.filter(function (a) { return a.work === w; });
+    return '<li><em>' + (i < 9 ? '0' : '') + (i + 1) + '</em><div><h3>《' + esc(D.works[w]) + '》</h3></div><div class="badges">' +
       as.map(function (a) { return '<span class="badge ' + (a.prize === '特等奖' ? 'g1' : a.level === '国赛' ? (a.prize === '一等奖' ? 'g1' : 'g2') : '') + '">' + D.comps[a.comp].short + ' · ' + levelName(a) + '<b>' + prizeText(a) + '</b></span>'; }).join('') + '</div></li>';
   }).join('');
 })();

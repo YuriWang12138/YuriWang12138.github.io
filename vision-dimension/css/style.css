@@ -75,20 +75,13 @@ ul,ol{list-style:none}
 .about-lead{font-size:clamp(26px,3.3vw,44px);line-height:1.55;font-weight:600;letter-spacing:.04em}
 .about-lead mark{white-space:nowrap;background:linear-gradient(transparent 62%,rgba(240,193,154,.75) 62%);color:inherit;padding:0 .08em}
 .about-text p{color:#4b4551;margin-bottom:1.2em;text-align:justify}
-.club{display:grid;grid-template-columns:1fr 1.35fr;gap:clamp(24px,4vw,56px);margin-top:clamp(36px,6vh,64px)}
+.club{margin-top:clamp(36px,6vh,64px)}
 .club h3{font-size:20px;letter-spacing:.2em;font-weight:600;margin-bottom:16px}
 .club h3 span{font-family:var(--latin);font-size:12px;letter-spacing:.4em;color:var(--ink2);margin-left:12px;font-weight:400}
-.club dl{border-top:1px solid var(--line)}
-.club dl div{display:grid;grid-template-columns:8.5em 1fr;gap:12px;padding:10px 4px;border-bottom:1px solid var(--line);font-size:14.5px}
+.club dl{display:grid;grid-template-columns:repeat(3,1fr);column-gap:clamp(20px,3vw,40px);border-top:1px solid var(--line)}
+.club dl div{display:grid;grid-template-columns:7.5em 1fr;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line);font-size:14.5px}
 .club dt{color:var(--ink2);letter-spacing:.1em}
 .club dd{font-weight:600}
-.club ol{display:grid;gap:10px}
-.club ol li{display:grid;grid-template-columns:34px 1fr;align-items:baseline;padding:12px 16px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.4)}
-.club ol em{font-family:var(--latin);font-style:italic;font-size:20px;color:var(--sun)}
-.club ol b{font-weight:600;letter-spacing:.08em;margin-right:12px}
-.club ol span{color:#4b4551;font-size:14px}
-.club-note{margin-top:14px;font-size:13.5px;color:var(--ink2);line-height:1.9}
-.club-note b{color:var(--ink);font-weight:600}
 .msg{padding-top:0}
 .msg-card{position:relative;max-width:860px;margin:0 auto;padding:clamp(40px,6vw,72px) clamp(26px,6vw,84px) clamp(34px,5vw,56px);border-radius:22px;background:linear-gradient(135deg,#1f1d3a,#4b4687 62%,#7a5a86);color:#f4efe9;box-shadow:0 40px 60px -40px rgba(31,29,58,.7);overflow:hidden}
 .msg-card:before{content:"\201C";position:absolute;left:clamp(14px,3vw,36px);top:-18px;font-family:var(--latin);font-size:190px;line-height:1;color:#e8c58c;opacity:.28}
@@ -331,7 +324,7 @@ ul,ol{list-style:none}
 .lb-close{right:22px;top:22px}.lb-prev{left:22px;top:50%}.lb-next{right:22px;top:50%}
 
 @media (max-width:900px){
-  .club{grid-template-columns:1fr}
+  .club dl{grid-template-columns:repeat(2,1fr)}
   .about-grid{grid-template-columns:1fr}
   .stats{grid-template-columns:repeat(2,1fr)}
   .stats li:nth-child(3){border-left:0}
@@ -355,7 +348,7 @@ ul,ol{list-style:none}
   .bg-orbits{width:190vw}
 }
 @media (max-width:560px){
-  .bgm-btn .lbl{display:none}.bgm-btn{padding:0 14px}.club ol li{grid-template-columns:28px 1fr}.club ol b{display:block}.pf-list small.no{display:block;margin-left:0}.pf-msg{padding:18px 20px;font-size:15px;letter-spacing:.02em}
+  .bgm-btn .lbl{display:none}.bgm-btn{padding:0 14px}.club dl{grid-template-columns:1fr}.pf-list small.no{display:block;margin-left:0}.pf-msg{padding:18px 20px;font-size:15px;letter-spacing:.02em}
   .org-depts{grid-template-columns:1fr}
   .nav-brand b{display:none}
   .pf-list li{grid-template-columns:1fr auto}.pf-list time{display:none}
