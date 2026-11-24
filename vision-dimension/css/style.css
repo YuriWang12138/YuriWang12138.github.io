@@ -108,7 +108,8 @@ ul,ol{list-style:none}
 .marquee{overflow:hidden;margin:clamp(40px,7vh,70px) calc(50% - 50vw) 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:16px 0}
 .marquee-in{display:flex;gap:56px;width:max-content;animation:marq 85s linear infinite;font-size:clamp(20px,2.4vw,30px);font-family:var(--brush);color:var(--ink2);white-space:nowrap}
 .marquee-in span:nth-child(odd){color:var(--violet)}
-.marquee-in i{font-style:normal;color:var(--sun)}
+.marquee-in i{display:inline-flex;align-items:center;font-style:normal;color:var(--sun)}
+.marquee-in .sparkle svg{width:.55em;height:.55em;fill:currentColor}
 @keyframes marq{to{transform:translateX(-50%)}}
 
 /* ---------- team stage ---------- */
@@ -213,6 +214,7 @@ ul,ol{list-style:none}
 .ring-ui button{width:38px;height:38px;border:1px solid var(--line);border-radius:50%;font-size:15px;letter-spacing:0;transition:.3s}
 .ring-ui button:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .ring-ui .repack{width:auto;border-radius:99px;padding:0 16px;font-size:12px;letter-spacing:.16em;margin-left:14px}
+.repack-icon{width:14px;height:14px;margin-right:5px;vertical-align:-2px}
 .focus-ui{position:absolute;inset:0;z-index:9;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .5s,visibility 0s .5s}
 .stage.focus .focus-ui{opacity:1;visibility:visible;transition:opacity .5s}
 .focus-left{position:absolute;right:calc(50% + var(--cw)*.82);top:50%;transform:translateY(-50%);text-align:right;max-width:26vw}
@@ -348,7 +350,7 @@ ul,ol{list-style:none}
   .bg-orbits{width:190vw}
 }
 @media (max-width:560px){
-  .bgm-btn .lbl{display:none}.bgm-btn{padding:0 14px}.club dl{grid-template-columns:1fr}.pf-list small.no{display:block;margin-left:0}.pf-msg{padding:18px 20px;font-size:15px;letter-spacing:.02em}
+  .bgm-btn .lbl{display:none}.bgm-btn{padding:0 14px}.club dl{grid-template-columns:1fr}.pf-msg{padding:18px 20px;font-size:15px;letter-spacing:.02em}
   .org-depts{grid-template-columns:1fr}
   .nav-brand b{display:none}
   .pf-list li{grid-template-columns:1fr auto}.pf-list time{display:none}

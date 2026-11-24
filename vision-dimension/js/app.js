@@ -31,7 +31,7 @@ function tally(list) { var t = { 国赛: 0, 省赛: 0 }; list.forEach(function (
   var t = tally(D.awards), workIds = Object.keys(D.works);
   $('#stats').innerHTML = [[t['国赛'], '国家级奖项'], [t['省赛'], '省级奖项'], [D.mentorAwards.length, '优秀指导教师'], [workIds.length, '获奖作品']]
     .map(function (s) { return '<li><b data-n="' + s[0] + '">0</b><span>' + s[1] + '</span></li>'; }).join('');
-  var mq = workIds.map(function (w) { return '<span>《' + esc(D.works[w]) + '》</span><i>✦</i>'; }).join('');
+  var mq = workIds.map(function (w) { return '<span>《' + esc(D.works[w]) + '》</span><i class="sparkle"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 2 61 39 98 50 61 61 50 98 39 61 2 50 39 39Z"/></svg></i>'; }).join('');
   $('#marquee').innerHTML = mq + mq;
 
   var c = D.club;
@@ -456,7 +456,7 @@ var profile = $('#profile');
 function openProfile(i) {
   var m = D.members[i], as = awardsOf(m), th = m.theme, list = [];
   CERTS.forEach(function (c, ci) { if (m.guidesAll ? (c.mentor || c.guide === m.name) : c.by.indexOf(m.id) >= 0) list.push(ci); });
-  var rows = as.map(function (a) { return '<li><time>' + a.date + '</time><span>《' + esc(D.works[a.work]) + '》<small>' + D.comps[a.comp].short + (a.cat ? ' · ' + a.cat : '') + '</small>' + (a.no ? '<small class="no">证书编号 ' + a.no + '</small>' : '') + '</span><b>' + levelName(a) + ' ' + prizeText(a) + '</b></li>'; });
+  var rows = as.map(function (a) { return '<li><time>' + a.date + '</time><span>《' + esc(D.works[a.work]) + '》<small>' + D.comps[a.comp].short + (a.cat ? ' · ' + a.cat : '') + '</small></span><b>' + levelName(a) + ' ' + prizeText(a) + '</b></li>'; });
   if (m.guidesAll) D.mentorAwards.forEach(function (a) { rows.push('<li><time>2026</time><span>优秀指导教师<small>' + D.comps[a.comp].name + (a.work ? ' · 《' + esc(D.works[a.work]) + '》' : '') + '</small></span><b>' + levelName(a) + '</b></li>'); });
   $('#profileIn').innerHTML =
     '<div class="pf-photo" style="--c1:' + th[0] + ';--c2:' + th[1] + ';--c3:' + th[2] + '"><img src="' + asset('assets/img/members/' + m.key + '-full.webp') + '" alt="' + m.name + '"></div>' +
@@ -492,16 +492,42 @@ window.addEventListener('keydown', function (e) {
 
 /* ================= background music ================= */
 (function () {
-  var au = $('#bgm'), btn = $('#bgmBtn'), VOL = .55, want = false, raf = 0;
+  var au = $('#bgm'), btn = $('#bgmBtn'), VOL = .55, want = true, raf = 0;
+  var unlockEvents = ['pointerdown', 'keydown', 'touchend'];
+  function clearUnlock() { unlockEvents.forEach(function (type) { document.removeEventListener(type, unlock, true); }); }
+  function unlock(e) {
+    if (e.target && btn.contains(e.target)) return;
+    clearUnlock();
+    if (want) play();
+  }
+  function waitForGesture() {
+    clearUnlock();
+    unlockEvents.forEach(function (type) { document.addEventListener(type, unlock, { capture: true, passive: true, once: true }); });
+  }
   function fade(to, done) {
     cancelAnimationFrame(raf);
     var from = au.volume, t0 = performance.now();
     (function step(now) { var k = Math.min(1, (now - t0) / 700); au.volume = from + (to - from) * k; if (k < 1) raf = requestAnimationFrame(step); else if (done) done(); })(t0);
   }
   function ui(on) { btn.classList.toggle('on', on); btn.setAttribute('aria-pressed', on ? 'true' : 'false'); btn.title = on ? '暂停配乐' : '播放配乐'; btn.setAttribute('aria-label', btn.title); }
-  function play() { au.volume = 0; var p = au.play(); if (p && p.then) p.then(function () { ui(true); fade(VOL); }, function () { want = false; ui(false); }); else { ui(true); fade(VOL); } }
-  btn.onclick = function () { want = !want; if (want) play(); else { ui(false); fade(0, function () { au.pause(); }); } };
+  function play() {
+    au.volume = 0;
+    var p = au.play();
+    if (p && p.then) p.then(function () {
+      if (au.paused) { ui(false); waitForGesture(); return; }
+      clearUnlock(); ui(true); fade(VOL);
+    }, function () { ui(false); waitForGesture(); });
+    else if (!au.paused) { clearUnlock(); ui(true); fade(VOL); }
+    else { ui(false); waitForGesture(); }
+  }
+  au.addEventListener('pause', function () { if (want) { ui(false); waitForGesture(); } });
+  btn.onclick = function () {
+    if (!au.paused) { want = false; ui(false); fade(0, function () { au.pause(); }); }
+    else { want = true; play(); }
+  };
   document.addEventListener('visibilitychange', function () { if (!want) return; if (document.hidden) au.pause(); else play(); });
+  ui(false);
+  play();
 })();
 
 /* ================= nav, reveal, counters ================= */
