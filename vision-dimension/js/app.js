@@ -34,6 +34,14 @@ function tally(list) { var t = { 国赛: 0, 省赛: 0 }; list.forEach(function (
   var mq = workIds.map(function (w) { return '<span>《' + esc(D.works[w]) + '》</span><i>✦</i>'; }).join('');
   $('#marquee').innerHTML = mq + mq;
 
+  var c = D.club;
+  $('#clubFacts').innerHTML = c.facts.map(function (f) { return '<div><dt>' + f[0] + '</dt><dd>' + f[1] + '</dd></div>'; }).join('');
+  $('#clubActs').innerHTML = c.activities.map(function (a, i) { return '<li><em>0' + (i + 1) + '</em><div><b>' + a[0] + '</b><span>' + a[1] + '</span></div></li>'; }).join('');
+  $('#clubNote').innerHTML = '选题围绕 <b>' + c.themes.join(' · ') + '</b> 展开；首场活动拟为「<b>' + c.first + '</b>」。' + c.rule;
+  var mm = D.members.filter(function (m) { return m.message; })[0];
+  $('#msgCard').innerHTML = mm.message.map(function (l) { return '<p>' + esc(l) + '</p>'; }).join('') +
+    '<figcaption>' + mm.role + '　' + mm.name + (mm.sign ? '<img src="' + asset('assets/img/sign/' + mm.key + '.png') + '" alt="' + mm.name + '签名">' : '') + '</figcaption>';
+
   var o = D.org;
   $('#orgTree').innerHTML =
     '<div class="org-tier reveal"><p class="org-label"><em>01</em>指导教师<i>GUIDANCE</i></p><div class="org-row">' +
@@ -47,7 +55,7 @@ function tally(list) { var t = { 国赛: 0, 省赛: 0 }; list.forEach(function (
     var as = D.awards.filter(function (a) { return a.work === w; }), names = [], ms = [];
     as.forEach(function (a) { a.by.forEach(function (id) { if (names.indexOf(nameOf(id)) < 0) names.push(nameOf(id)); }); if (mentorOf(a) && ms.indexOf(mentorOf(a)) < 0) ms.push(mentorOf(a)); });
     return '<li><em>' + (i < 9 ? '0' : '') + (i + 1) + '</em><div><h3>《' + esc(D.works[w]) + '》</h3><p>' + names.map(esc).join(' · ') + (ms.length ? '　指导教师 ' + ms.map(esc).join(' · ') : '') + '</p></div><div class="badges">' +
-      as.map(function (a) { return '<span class="badge ' + (a.level === '国赛' ? (a.prize === '一等奖' ? 'g1' : 'g2') : '') + '">' + D.comps[a.comp].short + ' · ' + levelName(a) + '<b>' + prizeText(a) + '</b></span>'; }).join('') + '</div></li>';
+      as.map(function (a) { return '<span class="badge ' + (a.prize === '特等奖' ? 'g1' : a.level === '国赛' ? (a.prize === '一等奖' ? 'g1' : 'g2') : '') + '">' + D.comps[a.comp].short + ' · ' + levelName(a) + '<b>' + prizeText(a) + '</b></span>'; }).join('') + '</div></li>';
   }).join('');
 })();
 
@@ -451,13 +459,14 @@ var profile = $('#profile');
 function openProfile(i) {
   var m = D.members[i], as = awardsOf(m), th = m.theme, list = [];
   CERTS.forEach(function (c, ci) { if (m.guidesAll ? (c.mentor || c.guide === m.name) : c.by.indexOf(m.id) >= 0) list.push(ci); });
-  var rows = as.map(function (a) { return '<li><time>' + a.date + '</time><span>《' + esc(D.works[a.work]) + '》<small>' + D.comps[a.comp].short + (a.cat ? ' · ' + a.cat : '') + '</small></span><b>' + levelName(a) + ' ' + prizeText(a) + '</b></li>'; });
+  var rows = as.map(function (a) { return '<li><time>' + a.date + '</time><span>《' + esc(D.works[a.work]) + '》<small>' + D.comps[a.comp].short + (a.cat ? ' · ' + a.cat : '') + '</small>' + (a.no ? '<small class="no">证书编号 ' + a.no + '</small>' : '') + '</span><b>' + levelName(a) + ' ' + prizeText(a) + '</b></li>'; });
   if (m.guidesAll) D.mentorAwards.forEach(function (a) { rows.push('<li><time>2026</time><span>优秀指导教师<small>' + D.comps[a.comp].name + (a.work ? ' · 《' + esc(D.works[a.work]) + '》' : '') + '</small></span><b>' + levelName(a) + '</b></li>'); });
   $('#profileIn').innerHTML =
     '<div class="pf-photo" style="--c1:' + th[0] + ';--c2:' + th[1] + ';--c3:' + th[2] + '"><img src="' + asset('assets/img/members/' + m.key + '-full.webp') + '" alt="' + m.name + '"></div>' +
     '<p class="pf-role">' + m.roleEn + '</p><h2 class="pf-name">' + m.name + '</h2><p class="pf-sub">' + m.role + ' · ' + m.duty + '</p>' +
     (m.sign ? '<img class="pf-sign" src="' + asset('assets/img/sign/' + m.key + '.png') + '" alt="' + m.name + '签名">' : '') +
     '<p class="pf-bio">' + esc(m.bio) + '</p>' +
+    (m.message ? '<blockquote class="pf-msg"><b>MESSAGE · 寄语</b>' + m.message.map(esc).join('<br>') + '</blockquote>' : '') +
     '<div class="pf-meta">' + m.tags.map(function (t) { return '<span>' + t + '</span>'; }).join('') + '</div>' +
     '<h3 class="pf-h"><b>' + (m.guidesAll ? '指导获奖' : '获奖记录') + '</b>AWARDS · ' + rows.length + '</h3><ul class="pf-list">' + rows.join('') + '</ul>' +
     (list.length ? '<h3 class="pf-h"><b>证书</b>CERTIFICATES</h3><div class="pf-certs">' + list.map(function (ci) { return certHtml(CERTS[ci], ci); }).join('') + '</div>' : '');
@@ -483,6 +492,20 @@ window.addEventListener('keydown', function (e) {
   else if (LB.el.classList.contains('on')) { if (e.key === 'ArrowLeft') lbShow(LB.i - 1); if (e.key === 'ArrowRight') lbShow(LB.i + 1); }
   else if (ring.mode === 'ring' && !profile.classList.contains('on')) { var r = stage.getBoundingClientRect(); if (r.top < innerHeight * .6 && r.bottom > innerHeight * .4) { if (e.key === 'ArrowLeft') step(-1); if (e.key === 'ArrowRight') step(1); } }
 });
+
+/* ================= background music ================= */
+(function () {
+  var au = $('#bgm'), btn = $('#bgmBtn'), VOL = .55, want = false, raf = 0;
+  function fade(to, done) {
+    cancelAnimationFrame(raf);
+    var from = au.volume, t0 = performance.now();
+    (function step(now) { var k = Math.min(1, (now - t0) / 700); au.volume = from + (to - from) * k; if (k < 1) raf = requestAnimationFrame(step); else if (done) done(); })(t0);
+  }
+  function ui(on) { btn.classList.toggle('on', on); btn.setAttribute('aria-pressed', on ? 'true' : 'false'); btn.title = on ? '暂停配乐' : '播放配乐'; btn.setAttribute('aria-label', btn.title); }
+  function play() { au.volume = 0; var p = au.play(); if (p && p.then) p.then(function () { ui(true); fade(VOL); }, function () { want = false; ui(false); }); else { ui(true); fade(VOL); } }
+  btn.onclick = function () { want = !want; if (want) play(); else { ui(false); fade(0, function () { au.pause(); }); } };
+  document.addEventListener('visibilitychange', function () { if (!want) return; if (document.hidden) au.pause(); else play(); });
+})();
 
 /* ================= nav, reveal, counters ================= */
 var nav = $('#nav'), links = $$('.nav nav a');

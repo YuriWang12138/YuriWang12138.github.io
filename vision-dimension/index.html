@@ -44,11 +44,15 @@
   <div class="about-grid">
     <p class="about-lead reveal">用 AI 作画笔，<br>把<mark>非遗</mark>、<mark>红色文化</mark><br>与<mark>城市记忆</mark>，<br>讲成新的视觉故事。</p>
     <div class="about-text reveal">
-      <p>视像维度（VISION DIMENSION）是鞍山师范学院的 AI 视觉设计社团。我们围绕创意设计、数字影像、内容传播与项目实践四个方向开展活动，下设视觉设计部、AI 影像部、新媒体运营部与项目管理部。</p>
-      <p>2026 年，社团作品在中国好创意暨全国数字艺术设计大赛、未来设计师·全国高校数字艺术设计大赛（NCDA）、全国大学生数字媒体科技作品及创意竞赛和辽宁省大学生文化创意设计大赛等赛事中接连获奖，其中《偷走蓝色的人——蓝印花布印染非遗技艺》获中国好创意全国总决赛一等奖。</p>
+      <p>视像维度（VISION DIMENSION）是鞍山师范学院管理学院指导的 AI 视觉设计社团，由原学生创作团队拓展组建，以人工智能生成内容（AIGC）创作为主要方向，为有兴趣的同学提供共同学习、协作创作和展示交流的平台。我们围绕创意设计、数字影像、内容传播与项目实践四个方向开展活动，下设视觉设计部、AI 影像部、新媒体运营部与项目管理部。</p>
+      <p>2026 年，社团作品在中国好创意暨全国数字艺术设计大赛、未来设计师·全国高校数字艺术设计大赛（NCDA）、全国大学生数字媒体科技作品及创意竞赛、全国3D大赛，以及辽宁省大学生文化创意设计大赛、虚拟现实与新媒体创新设计大赛、“瑰宝传承”戏曲文化创新创意大赛、两岸新锐设计竞赛“华灿奖”等赛事中接连获奖，其中《偷走蓝色的人——蓝印花布印染非遗技艺》获中国好创意全国总决赛一等奖，《昆仑谣-亘古风骨》获全国3D大赛昆仑谣·数字文旅创作大赛省赛特等奖。</p>
     </div>
   </div>
   <ul class="stats reveal" id="stats"></ul>
+  <div class="club reveal">
+    <div class="club-file"><h3>社团档案<span>PROFILE</span></h3><dl id="clubFacts"></dl></div>
+    <div class="club-acts"><h3>日常活动<span>ACTIVITIES</span></h3><ol id="clubActs"></ol><p class="club-note" id="clubNote"></p></div>
+  </div>
   <div class="marquee" aria-hidden="true"><div class="marquee-in" id="marquee"></div></div>
 </section>
 
@@ -113,6 +117,11 @@
   </div>
   <div class="cert-grid" id="certGrid"></div>
 </section>
+
+<section class="sec msg" id="message">
+  <div class="sec-head reveal"><em>05</em><h2>导师寄语<span>MESSAGE</span></h2></div>
+  <figure class="msg-card reveal" id="msgCard"></figure>
+</section>
 </main>
 
 <footer class="foot">
@@ -121,6 +130,9 @@
   <p>鞍山师范学院 · AI 视觉设计社团</p>
   <p class="foot-tags">创意设计 · 数字影像 · 内容传播 · 项目实践</p>
 </footer>
+
+<audio id="bgm" loop preload="none" src="assets/audio/bgm.mp3"></audio>
+<button class="bgm-btn" id="bgmBtn" type="button" aria-pressed="false" aria-label="播放配乐" title="播放配乐"><span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="lbl">配乐</span></button>
 
 <div class="profile" id="profile" aria-hidden="true"><button class="profile-back" id="profileBack" type="button">← 返回卡牌</button><div class="profile-in" id="profileIn"></div></div>
 <div class="lightbox" id="lightbox" aria-hidden="true"><button type="button" class="lb-close" aria-label="关闭">×</button><button type="button" class="lb-prev" aria-label="上一张">←</button><figure><img id="lbImg" alt=""><figcaption id="lbCap"></figcaption></figure><button type="button" class="lb-next" aria-label="下一张">→</button></div>
